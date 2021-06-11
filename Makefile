@@ -22,3 +22,15 @@ debug:
 .PHONY: clean
 clean:
 	rm -rf build
+
+.PHONY: run
+run:
+	./build/monitor
+
+.PHONY: buildrun
+buildrun:
+	cd build && \
+	cmake .. && \
+	make
+	cd ..
+	./build/monitor
