@@ -158,14 +158,14 @@ int LinuxParser::ParseProcInfo(std::string key_name) {
     std::string::size_type sz;
     std::ifstream filestream(LinuxParser::kProcDirectory + LinuxParser::kStatFilename);
     if (filestream.is_open()) {
-        while (std::getline(filestream, line)) {
+      while (std::getline(filestream, line)) {
         std::istringstream linestream(line);
         while (linestream >> key >> value) {
             if (key == key_name) {
             return std::stol(value, &sz);
             }
         }
-        }
+      }
     }
     return return_value;
 }
@@ -180,25 +180,83 @@ int LinuxParser::RunningProcesses() {
   return LinuxParser::ParseProcInfo("procs_running");
 }
 
-// TODO: Read and return the command associated with a process
-// REMOVE: [[maybe_unused]] once you define the function
-string LinuxParser::Command(int pid[[maybe_unused]]) { return string(); }
-
-// TODO: Read and return the memory used by a process
-// REMOVE: [[maybe_unused]] once you define the function
-string LinuxParser::Ram(int pid[[maybe_unused]]) { 
-
-  return "memdata_data"; 
+// DONE: Read and return the command associated with a process
+string LinuxParser::Command(int pid[[maybe_unused]]) {
+  std::string line;
+  std::vector<std::string> data;
+  std::ifstream filestream(LinuxParser::kProcDirectory + std::to_string(pid) + LinuxParser::kCmdlineFilename);
+  if (filestream.is_open()) {
+    std::getline(filestream, line);
+  }
+  return line;
 }
 
-// TODO: Read and return the user ID associated with a process
-// REMOVE: [[maybe_unused]] once you define the function
-string LinuxParser::Uid(int pid[[maybe_unused]]) { return string(); }
+// DONE: Read and return the memory used by a process
+string LinuxParser::Ram(int pid) { 
+  std::string line, name, el, sz;
+  std::vector<std::string> data;
+  std::ifstream filestream(LinuxParser::kProcDirectory + std::to_string(pid) + LinuxParser::kStatusFilename);
+  if (filestream.is_open()) {
+    while (std::getline(filestream, line)) {
+      if (line.rfind("VmSize", 0) == 0) {
+        std::istringstream linestream(line);
+        linestream >> name >> el >> sz;
+        break;
+      }
+      
+    }
+  }
+  if (el.empty()) return "0";
+  return el; 
+}
 
-// TODO: Read and return the user associated with a process
-// REMOVE: [[maybe_unused]] once you define the function
-string LinuxParser::User(int pid[[maybe_unused]]) { return string(); }
+// DONE: Read and return the user ID associated with a process
+string LinuxParser::Uid(int pid) {
+  std::string line, name, el;
+  std::vector<std::string> data;
+  std::ifstream filestream(LinuxParser::kProcDirectory + std::to_string(pid) + LinuxParser::kStatusFilename);
+  if (filestream.is_open()) {
+    while (std::getline(filestream, line)) {
+      if (line.rfind("Uid:", 0) == 0) {
+        std::istringstream linestream(line);
+        linestream >> name >> el;
+        break;
+      }
+      
+    }
+  }
+  return el; 
+}
 
-// TODO: Read and return the uptime of a process
-// REMOVE: [[maybe_unused]] once you define the function
-long LinuxParser::UpTime(int pid[[maybe_unused]]) { return 0; }
+// DONE: Read and return the user associated with a process
+string LinuxParser::User(int pid) {
+  string user, x, uid, line;
+  std::ifstream filestream(kPasswordPath); //parsing "/etc/passwd"
+  if (filestream.is_open()){
+    while (std::getline(filestream, line)){
+      std::replace(line.begin(), line.end(), ':', ' ');
+      std::istringstream linestream(line);
+      while (linestream >> user >> x >> uid){
+        if (uid == LinuxParser::Uid(pid)){
+          return user;
+        }
+      }
+    }
+  }
+  return string();
+}
+
+// DONE: Read and return the uptime of a process
+long LinuxParser::UpTime(int pid) {
+  std::string line, el;
+  std::vector<std::string> data;
+  std::ifstream filestream(LinuxParser::kProcDirectory + std::to_string(pid) + LinuxParser::kStatFilename);
+  if (filestream.is_open()) {
+    std::getline(filestream, line);
+    std::istringstream linestream(line);
+    while(linestream >> el) {
+      data.push_back(el);
+    }
+  }
+  return LinuxParser::UpTime() - std::stoll(data[21]) / sysconf(_SC_CLK_TCK); 
+}
