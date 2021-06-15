@@ -27,8 +27,12 @@ vector<Process>& System::Processes() {
     
     for (int pid : pids){
         if (extant_pids.find(pid) == extant_pids.end())
-            processes_.emplace_back(Process(pid)); // insert only new pid
+            processes_.push_back(Process(pid)); // insert only new pid
     }
+
+
+    auto comp = [](Process& a, Process& b){return b < a;}; // using implemented bool operator<(Process const& a) const; 
+    std::sort(processes_.begin(), processes_.end(), comp); 
 
     return processes_; }
 

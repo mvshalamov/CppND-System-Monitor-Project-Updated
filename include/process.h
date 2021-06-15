@@ -2,6 +2,7 @@
 #define PROCESS_H
 
 #include <string>
+#include <vector>
 /*
 Basic class for Process representation
 It contains relevant attributes as shown below
@@ -20,6 +21,8 @@ class Process {
   // TODO: Declare any necessary private members
  private:
     int pid_;
+    float cpu_usage_{0.0};
+    std::vector<std::string> data_{"0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", };
 };
 
 #endif
