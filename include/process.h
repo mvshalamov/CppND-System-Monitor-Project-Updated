@@ -9,7 +9,7 @@ It contains relevant attributes as shown below
 */
 class Process {
  public:
-    Process(int pid);
+  Process(int pid);
   int Pid();                               // TODO: See src/process.cpp
   std::string User();                      // TODO: See src/process.cpp
   std::string Command();                   // TODO: See src/process.cpp
@@ -20,9 +20,9 @@ class Process {
 
   // TODO: Declare any necessary private members
  private:
-    int pid_;
-    float cpu_usage_{0.0};
-    std::vector<std::string> data_{"0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", };
+   void CpuUtilization_(); 
+   int pid_;
+   float cpu_usage_{0.0};
 };
 
 #endif

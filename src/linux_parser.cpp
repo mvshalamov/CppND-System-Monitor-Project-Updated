@@ -111,12 +111,12 @@ long LinuxParser::UpTime() {
   return luptime;
 }
 
-// ВЩТУ: Read and return the number of jiffies for the system
+// DONE: Read and return the number of jiffies for the system
 long LinuxParser::Jiffies() {
   long num_jiffies = 0;
-  vector<string> cpu_time = LinuxParser::CpuUtilization();
+  vector<string> cpu_data = LinuxParser::CpuUtilization();
   for (int i = 0; i < 8; i++)
-    num_jiffies += std::stol(cpu_time[i]);
+    num_jiffies += std::stol(cpu_data[i]);
   return num_jiffies;
 }
 
@@ -190,25 +190,27 @@ int LinuxParser::RunningProcesses() {
 
 // DONE: Read and return the command associated with a process
 string LinuxParser::Command(int pid[[maybe_unused]]) {
-  std::string line;
+  std::string line, cmd;
   std::vector<std::string> data;
   std::ifstream filestream(LinuxParser::kProcDirectory + std::to_string(pid) + LinuxParser::kCmdlineFilename);
   if (filestream.is_open()) {
     std::getline(filestream, line);
+    std::istringstream linestream(line);
+    linestream >> cmd;
   }
-  return line;
+  return cmd;
 }
 
 // DONE: Read and return the memory used by a process
 string LinuxParser::Ram(int pid) { 
-  std::string line, name, el, sz;
+  std::string line, name, el;
   std::vector<std::string> data;
   std::ifstream filestream(LinuxParser::kProcDirectory + std::to_string(pid) + LinuxParser::kStatusFilename);
   if (filestream.is_open()) {
     while (std::getline(filestream, line)) {
       if (line.rfind("VmSize", 0) == 0) {
         std::istringstream linestream(line);
-        linestream >> name >> el >> sz;
+        linestream >> name >> el;
         break;
       }
       
@@ -237,13 +239,13 @@ string LinuxParser::Uid(int pid) {
 
 // DONE: Read and return the user associated with a process
 string LinuxParser::User(int pid) {
-  string user, x, uid, line;
-  std::ifstream filestream(kPasswordPath); //parsing "/etc/passwd"
+  string user, mis1, uid, line;
+  std::ifstream filestream(kPasswordPath);
   if (filestream.is_open()){
     while (std::getline(filestream, line)){
       std::replace(line.begin(), line.end(), ':', ' ');
       std::istringstream linestream(line);
-      while (linestream >> user >> x >> uid){
+      while (linestream >> user >> mis1 >> uid){
         if (uid == LinuxParser::Uid(pid)){
           return user;
         }
