@@ -31,16 +31,16 @@ float Processor::Utilization() {
     vector<int> processor_data;
     for (string el : processor_data_str) processor_data.push_back(std::stoi(el));
     
-    int prev_idle = prev_processor_data[3] + prev_processor_data[4];
-    int idle = processor_data[3] + processor_data[4];
+    int prev_idle = prev_processor_data[LinuxParser::CPUStates::kIdle_] + prev_processor_data[LinuxParser::CPUStates::kIOwait_];
+    int idle = processor_data[LinuxParser::CPUStates::kIdle_] + processor_data[LinuxParser::CPUStates::kIOwait_];
 
-    int prev_non_idle = prev_processor_data[0] + prev_processor_data[1] + \ 
-        prev_processor_data[2] + prev_processor_data[5] + prev_processor_data[6] + \
-        prev_processor_data[7];
+    int prev_non_idle = prev_processor_data[LinuxParser::CPUStates::kUser_] + prev_processor_data[LinuxParser::CPUStates::kNice_] + \
+        prev_processor_data[LinuxParser::CPUStates::kSystem_] + prev_processor_data[LinuxParser::CPUStates::kIRQ_] + \
+        prev_processor_data[LinuxParser::CPUStates::kSoftIRQ_] + prev_processor_data[LinuxParser::CPUStates::kSteal_];
 
-    int non_idle = processor_data[0] + processor_data[1] + \ 
-        processor_data[2] + processor_data[5] + processor_data[6] + \
-        processor_data[7];
+    int non_idle = processor_data[LinuxParser::CPUStates::kUser_] + processor_data[LinuxParser::CPUStates::kNice_] + \
+        processor_data[LinuxParser::CPUStates::kSystem_] + processor_data[LinuxParser::CPUStates::kIRQ_] + \
+        processor_data[LinuxParser::CPUStates::kSoftIRQ_] + processor_data[LinuxParser::CPUStates::kSteal_];
     
     int prev_total = prev_idle + prev_non_idle;
     int total = idle + non_idle;
@@ -49,5 +49,5 @@ float Processor::Utilization() {
     int idlead = idle - prev_idle;
 
     prev_processor_data = processor_data;
-    return (float)(totald - idlead)/totald; 
+    return static_cast<float>(totald - idlead)/totald; 
 }

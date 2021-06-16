@@ -25,7 +25,7 @@ vector<Process>& System::Processes() {
     processes_ = {};
     
     for (int pid : pids){
-            processes_.push_back(Process(pid));
+        processes_.emplace_back(Process(pid));
     }
 
     auto greater = [](Process& a, Process& b){return b < a;};

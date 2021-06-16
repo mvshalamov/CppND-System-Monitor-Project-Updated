@@ -69,8 +69,8 @@ vector<int> LinuxParser::Pids() {
 
 // DONE: Read and return the system memory utilization
 float LinuxParser::MemoryUtilization() { 
-  float total_memory = GetMemoryInfo("MemTotal");
-  float free_memory = GetMemoryInfo("MemFree");
+  float total_memory = GetMemoryInfo(LinuxParser::filterMemTotalString);
+  float free_memory = GetMemoryInfo(LinuxParser::filterMemFreeString);
 
   return (total_memory - free_memory) / total_memory; 
 }
@@ -126,12 +126,6 @@ long LinuxParser::ActiveJiffies(int pid) {
   return std::stoll(data[13]) + std::stoll(data[14]) + std::stoll(data[15]) + std::stoll(data[16]);
 }
 
-// TODO: Read and return the number of active jiffies for the system
-long LinuxParser::ActiveJiffies() { return 0; }
-
-// TODO: Read and return the number of idle jiffies for the system
-long LinuxParser::IdleJiffies() { return 0; }
-
 // DONE: Read and return CPU utilization
 vector<string> LinuxParser::CpuUtilization() {
 
@@ -141,7 +135,7 @@ vector<string> LinuxParser::CpuUtilization() {
     std::ifstream filestream(LinuxParser::kProcDirectory + LinuxParser::kStatFilename);
     if (filestream.is_open()) {
         while (std::getline(filestream, line)) {
-            if (line.rfind("cpu", 0) == 0) {
+            if (line.rfind(LinuxParser::filterCpu, 0) == 0) {
                 std::istringstream linestream(line);
                 bool i = false;
                 while (linestream >> data) {
@@ -180,12 +174,12 @@ int LinuxParser::ParseProcInfo(std::string key_name) {
 
 // DONE: Read and return the total number of processes
 int LinuxParser::TotalProcesses() { 
-  return LinuxParser::ParseProcInfo("processes");
+  return LinuxParser::ParseProcInfo(LinuxParser::filterProcesses);
 }
 
 // DONE: Read and return the number of running processes
 int LinuxParser::RunningProcesses() {
-  return LinuxParser::ParseProcInfo("procs_running");
+  return LinuxParser::ParseProcInfo(LinuxParser::filterRunningProcesses);
 }
 
 // DONE: Read and return the command associated with a process
@@ -208,7 +202,7 @@ string LinuxParser::Ram(int pid) {
   std::ifstream filestream(LinuxParser::kProcDirectory + std::to_string(pid) + LinuxParser::kStatusFilename);
   if (filestream.is_open()) {
     while (std::getline(filestream, line)) {
-      if (line.rfind("VmSize", 0) == 0) {
+      if (line.rfind(LinuxParser::filterProcMem, 0) == 0) {
         std::istringstream linestream(line);
         linestream >> name >> el;
         break;
@@ -222,19 +216,19 @@ string LinuxParser::Ram(int pid) {
 
 // DONE: Read and return the user ID associated with a process
 string LinuxParser::Uid(int pid) {
-  std::string line, name, el;
+  std::string line, name, uid;
   std::ifstream filestream(LinuxParser::kProcDirectory + std::to_string(pid) + LinuxParser::kStatusFilename);
   if (filestream.is_open()) {
     while (std::getline(filestream, line)) {
-      if (line.rfind("Uid:", 0) == 0) {
+      if (line.rfind(LinuxParser::filterUID, 0) == 0) {
         std::istringstream linestream(line);
-        linestream >> name >> el;
+        linestream >> name >> uid;
         break;
       }
       
     }
   }
-  return el; 
+  return uid; 
 }
 
 // DONE: Read and return the user associated with a process
@@ -263,7 +257,7 @@ std::vector<std::string> LinuxParser::ParseStatFileName(int pid) {
     std::getline(filestream, line);
     std::istringstream linestream(line);
     while(linestream >> el) {
-      data.push_back(el);
+      data.emplace_back(el);
     }
   }
   return data;
